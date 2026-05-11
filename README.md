@@ -1,1 +1,1 @@
-removing my previous statement so my domain dont get blocked
+If there's a Xavier NOtebook pkage is there a samsung?
