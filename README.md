@@ -1,1 +1,1 @@
-redsctung ny previous statement so my domain dont get blocked
+removing my previous statement so my domain dont get blocked
