@@ -2,59 +2,140 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Fancy Gold Animation</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&display=swap" rel="stylesheet">
-    
+    <title>3D Holographic Deconstruction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
     <style>
         body {
-            background-color: #0c0c0c; /* Dark background to make gold pop */
+            background-color: #020205;
+            margin: 0;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
             overflow: hidden;
+            perspective: 1200px;
+            font-family: 'Orbitron', sans-serif;
         }
 
-        .fancy-gold {
-            font-family: 'Cinzel', serif;
-            font-size: 8rem;
-            font-weight: 700;
+        /* Ambient scanline effect */
+        body::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .scene {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+        }
+
+        .hologram-wrap {
+            position: relative;
+            transform-style: preserve-3d;
+            text-align: center;
+            line-height: 0.9;
+            cursor: pointer;
+        }
+
+        .layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8vw;
+            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 5px;
-            
-            /* Creating the Gold Gradient */
-            background: linear-gradient(
-                to right, 
-                #bf953f 0%, 
-                #fcf6ba 25%, 
-                #b38728 50%, 
-                #fbf5b7 75%, 
-                #aa771c 100%
-            );
-            background-size: 200% auto;
-            
-            /* Clipping the background to the text */
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            
-            /* The Shine Animation */
-            animation: shine 4s linear infinite;
-            
-            /* Adding a subtle drop shadow for depth */
-            filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.5));
+            white-space: nowrap;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes shine {
-            to {
-                background-position: 200% center;
-            }
+        /* The "Core" Layer */
+        .layer-core {
+            color: #fff;
+            text-shadow: 0 0 20px #00f2ff, 0 0 40px #00f2ff;
+            z-index: 5;
+        }
+
+        /* Floating Slice Layers */
+        .layer-slice {
+            -webkit-text-stroke: 2px #00f2ff;
+            color: transparent;
+            opacity: 0.4;
+        }
+
+        /* Glitch Animation */
+        @keyframes glitch {
+            0% { transform: translate(-50%, -50%) skew(0deg); }
+            20% { transform: translate(-52%, -48%) skew(10deg); opacity: 0.8; }
+            21% { transform: translate(-50%, -50%) skew(0deg); opacity: 0.4; }
+            100% { transform: translate(-50%, -50%) skew(0deg); }
         }
     </style>
 </head>
 <body>
 
-    <div class="fancy-gold">say wallahi bro say wallahi bro</div>
+    <div class="scene" id="scene">
+        <div class="hologram-wrap" id="hologram">
+            </div>
+    </div>
 
+    <script>
+        const wrap = document.getElementById('hologram');
+        const text = "SAY WALLAHI<br>BRO";
+        const sliceCount = 8;
+
+        // Create the deconstructed slices
+        for (let i = -sliceCount; i <= sliceCount; i++) {
+            const layer = document.createElement('div');
+            
+            if (i === 0) {
+                layer.className = 'layer layer-core';
+            } else {
+                layer.className = 'layer layer-slice';
+                // Spread slices out along the Z axis
+                layer.style.transform = `translate(-50%, -50%) translateZ(${i * 40}px)`;
+                layer.style.opacity = 1 - (Math.abs(i) / sliceCount);
+            }
+            
+            layer.innerHTML = text;
+            wrap.appendChild(layer);
+        }
+
+        // Mouse Interactivity
+        let targetX = 0, targetY = 0;
+        let currentX = 0, currentY = 0;
+
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX - window.innerWidth / 2) / (window.innerWidth / 2);
+            const y = (e.clientY - window.innerHeight / 2) / (window.innerHeight / 2);
+            
+            targetY = x * 45; // Rotate around Y based on mouse X
+            targetX = -y * 45; // Rotate around X based on mouse Y
+        });
+
+        function render() {
+            // Smooth LERP movement
+            currentX += (targetX - currentX) * 0.1;
+            currentY += (targetY - currentY) * 0.1;
+            
+            wrap.style.transform = `rotateX(${currentX}deg) rotateY(${currentY}deg)`;
+            
+            // Subtle "jitter" to make it feel like a glitchy hologram
+            if (Math.random() > 0.98) {
+                wrap.style.filter = `hue-rotate(${Math.random() * 90}deg) brightness(2)`;
+                setTimeout(() => wrap.style.filter = 'none', 50);
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        render();
+    </script>
 </body>
 </html>
