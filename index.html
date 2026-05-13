@@ -2,148 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Liquid 3D 67 Swarm</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Stream</title>
     <style>
-        body {
-            background-color: #000205;
+        /* Basic reset and dark theme */
+        body, html {
             margin: 0;
-            height: 100vh;
+            padding: 0;
+            height: 100%;
+            background-color: #0f0f0f;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-            perspective: 1500px;
-            font-family: 'Orbitron', sans-serif;
+            font-family: sans-serif;
         }
 
-        /* Subtle Vignette and Depth Blur */
-        body::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.8) 100%);
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        .scene {
-            transform-style: preserve-3d;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .swarm-world {
+        /* Container to keep the video aspect ratio */
+        .video-container {
             position: relative;
-            transform-style: preserve-3d;
-            will-change: transform;
+            width: 90%;
+            max-width: 1000px;
+            /* 16:9 Aspect Ratio */
+            aspect-ratio: 16 / 9;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        .node {
+        /* Make the iframe fill the container */
+        iframe {
             position: absolute;
-            font-size: 1.2rem;
-            font-weight: 900;
-            color: #00f2ff;
-            /* Soft neon glow */
-            text-shadow: 0 0 10px rgba(0, 242, 255, 0.6);
-            user-select: none;
-            pointer-events: none;
-            /* Smooth transitions for all properties */
-            transition: opacity 2s ease-in-out, text-shadow 1.5s ease-in-out;
-            transform-style: preserve-3d;
-            opacity: 0.6;
-        }
-
-        /* Floating Light highlight */
-        .node-highlight {
-            color: #fff;
-            text-shadow: 0 0 20px #00f2ff, 0 0 40px #00f2ff;
-            opacity: 1;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
 <body>
 
-    <div class="scene">
-        <div class="swarm-world" id="world"></div>
+    <div class="video-container">
+        <iframe 
+            src="https://streamable.com/e/5q4ceu?" 
+            frameborder="0" 
+            allow="autoplay; fullscreen" 
+            allowfullscreen>
+        </iframe>
     </div>
 
-    <script>
-        const world = document.getElementById('world');
-        const nodeCount = 350; 
-        const nodes = [];
-
-        // Setup the swarm
-        for (let i = 0; i < nodeCount; i++) {
-            const div = document.createElement('div');
-            div.className = 'node';
-            div.innerText = "67";
-            
-            const state = {
-                x: (Math.random() - 0.5) * 1800,
-                y: (Math.random() - 0.5) * 1200,
-                z: (Math.random() - 0.5) * 2500,
-                offset: Math.random() * Math.PI * 2, // Random starting phase
-                speed: 0.001 + Math.random() * 0.002,
-                amplitude: 30 + Math.random() * 50
-            };
-
-            nodes.push({ el: div, state });
-            world.appendChild(div);
-        }
-
-        let targetRotX = 10, targetRotY = 0;
-        let curRotX = 10, curRotY = 0;
-        let isMouseDown = false;
-
-        document.addEventListener('mousedown', () => isMouseDown = true);
-        document.addEventListener('mouseup', () => isMouseDown = false);
-        document.addEventListener('mousemove', (e) => {
-            if (isMouseDown) {
-                targetRotY += e.movementX * 0.15;
-                targetRotX -= e.movementY * 0.15;
-            }
-        });
-
-        function animate(time) {
-            // Smooth World Rotation (Inertia)
-            if (!isMouseDown) {
-                targetRotY += 0.03; // Gentle constant spin
-            }
-            curRotX += (targetRotX - curRotX) * 0.05;
-            curRotY += (targetRotY - curRotY) * 0.05;
-            world.style.transform = `rotateX(${curRotX}deg) rotateY(${curRotY}deg)`;
-
-            // Individual Node Motion (Sine-based Float)
-            nodes.forEach((node, i) => {
-                const { el, state } = node;
-                
-                // Calculate silky smooth floating motion
-                const driftY = Math.sin(time * state.speed + state.offset) * state.amplitude;
-                const driftX = Math.cos(time * state.speed * 0.8 + state.offset) * (state.amplitude * 0.5);
-                
-                // Apply the transform
-                el.style.transform = `translate3d(${state.x + driftX}px, ${state.y + driftY}px, ${state.z}px)`;
-
-                // Soft Pulse Logic (Occasional slow glow)
-                if (i % 50 === 0) { // Every 50th node has a breathing glow
-                    const pulse = (Math.sin(time * 0.001 + state.offset) + 1) / 2;
-                    el.style.opacity = 0.2 + (pulse * 0.8);
-                    if (pulse > 0.9) {
-                        el.classList.add('node-highlight');
-                    } else {
-                        el.classList.remove('node-highlight');
-                    }
-                }
-            });
-
-            requestAnimationFrame(animate);
-        }
-
-        requestAnimationFrame(animate);
-    </script>
 </body>
 </html>
